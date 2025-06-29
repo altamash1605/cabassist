@@ -4,7 +4,7 @@ from datetime import date, timedelta
 import base64
 
 # --- Page Setup ---
-st.set_page_config(page_title="MoveInSync Cab Scheduler", page_icon="🚗", layout="centered")
+st.set_page_config(page_title="CabAssist", page_icon="🚗", layout="centered")
 
 # --- Background Image Setup ---
 def set_background(image_file):
@@ -52,7 +52,7 @@ set_background("background.png")
 # --- Form UI ---
 with st.container():
     st.markdown('<div class="glass-box">', unsafe_allow_html=True)
-    st.markdown("<h2 style='text-align: center;'>MoveInSync Cab Scheduler – v1.1.1</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>CabAssist</h2>", unsafe_allow_html=True)
 
     with st.form("cab_form"):
         st.markdown("### 👤 Employee Input")
@@ -85,37 +85,51 @@ if submit:
 
         rows = []
         for emp_id in ids:
-            for d in date_range:
-                if next_day_logout:
-                    # Login row on day 1
+            if next_day_logout:
+                for i, d in enumerate(date_range):
+                    shift_date = d.strftime("%-d/%-m/%Y")
+                    if i == 0:
+                        # First day login only
+                        rows.append({
+                            "EmployeeId": emp_id,
+                            "LogIn": shift_start,
+                            "LogOut": "",
+                            "LogInVenue": "",
+                            "LogOutVenue": "",
+                            "ShiftDate": shift_date,
+                            "EditType": "ADD"
+                        })
+                    else:
+                        rows.append({
+                            "EmployeeId": emp_id,
+                            "LogIn": shift_start,
+                            "LogOut": shift_end,
+                            "LogInVenue": "",
+                            "LogOutVenue": "",
+                            "ShiftDate": shift_date,
+                            "EditType": "ADD"
+                        })
+                # Add logout-only row on the next day
+                logout_day = end_date + timedelta(days=1)
+                rows.append({
+                    "EmployeeId": emp_id,
+                    "LogIn": "",
+                    "LogOut": shift_end,
+                    "LogInVenue": "",
+                    "LogOutVenue": "",
+                    "ShiftDate": logout_day.strftime("%-d/%-m/%Y"),
+                    "EditType": "ADD"
+                })
+            else:
+                for d in date_range:
+                    shift_date = d.strftime("%-d/%-m/%Y")
                     rows.append({
                         "EmployeeId": emp_id,
                         "LogIn": shift_start,
-                        "LogOut": "",
-                        "LogInVenue": "",
-                        "LogOutVenue": "",
-                        "ShiftDate": f"{d.day}/{d.month}/{d.year}",
-                        "EditType": "ADD"
-                    })
-                    # Logout row on next day
-                    next_day = d + timedelta(days=1)
-                    rows.append({
-                        "EmployeeId": emp_id,
-                        "LogIn": "",
                         "LogOut": shift_end,
                         "LogInVenue": "",
                         "LogOutVenue": "",
-                        "ShiftDate": f"{next_day.day}/{next_day.month}/{next_day.year}",
-                        "EditType": "ADD"
-                    })
-                else:
-                    rows.append({
-                        "EmployeeId": emp_id,
-                        "LogIn": shift_start,
-                        "LogOut": shift_end,
-                        "LogInVenue": "",
-                        "LogOutVenue": "",
-                        "ShiftDate": f"{d.day}/{d.month}/{d.year}",
+                        "ShiftDate": shift_date,
                         "EditType": "ADD"
                     })
 
@@ -126,7 +140,7 @@ if submit:
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
 
-# --- How to Use: Instruction Box ---
+# --- How to Use ---
 st.markdown("""
     <div class="glass-box">
         <h4>📘 How to Use This Tool</h4>
@@ -138,6 +152,6 @@ st.markdown("""
             <li>Click <strong>Generate CSV</strong> to download the file</li>
             <li>Upload it to your <strong>MoveInSync</strong> admin panel</li>
         </ol>
-        <p style="margin-top: 1rem;">ℹ️ The tool handles overnight shifts by splitting login and logout across two days.</p>
+        <p style="margin-top: 1rem;">ℹ️ Only one entry per date is generated — logout logic adjusts based on your checkbox selection.</p>
     </div>
 """, unsafe_allow_html=True)
