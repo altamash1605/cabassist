@@ -83,3 +83,31 @@ if submit:
 
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
+
+# --- How to Use: Info Glass Card ---
+st.markdown("""
+    <div style="
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: white;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    ">
+    <h4>🧾 How to Use</h4>
+    <ol>
+        <li>Paste each Employee ID on a new line</li>
+        <li>Select the start and end date for scheduling</li>
+        <li>Enter shift login and logout time in 24-hour format</li>
+        <li>Click "Generate CSV" to download the formatted file</li>
+        <li>Upload the CSV into MoveInSync dashboard</li>
+    </ol>
+    <p style="margin-top: 1rem;">ℹ️ The CSV is formatted automatically as per MoveInSync requirements.</p>
+    </div>
+""", unsafe_allow_html=True)
+
