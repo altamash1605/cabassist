@@ -40,7 +40,7 @@ def set_background(image_file):
     )
 
 # Load background
-set_background("background.jpg")
+set_background("background.png")
 
 # Glass container for the form
 with st.container():
