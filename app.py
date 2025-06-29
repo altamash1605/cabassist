@@ -38,7 +38,7 @@ def set_background(image_file):
     )
 
 # Apply background image
-set_background("background.jpg")
+set_background("background.png")
 
 # --- Form UI ---
 with st.container():
