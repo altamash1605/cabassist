@@ -48,26 +48,27 @@ with st.container():
 
     st.markdown("<h2 style='text-align: center;'>MoveInSync Bulk Cab Scheduler – v1.1</h2>", unsafe_allow_html=True)
 
-    with st.form("cab_form"):
-        emp_ids = st.text_area("Employee IDs (one per line)")
+with st.form("cab_form"):
+    st.markdown("### 👤 Employee Input")
 
-        col1, col2 = st.columns(2)
-        with col1:
-            start_date = st.date_input("Start Date", date.today())
-        with col2:
-            end_date = st.date_input("End Date", date.today())
+    emp_ids = st.text_area("Enter Employee IDs (one per line)", height=150)
 
-        col3, col4 = st.columns(2)
-        with col3:
-            shift_start = st.text_input("Shift Start (HH:MM, 24hr)", "22:30")
-        with col4:
-            shift_end = st.text_input("Shift End (HH:MM, 24hr)", "08:00")
+    st.markdown("### 🗓️ Schedule Settings")
+    col1, col2 = st.columns(2)
+    with col1:
+        start_date = st.date_input("Start Date", date.today())
+    with col2:
+        end_date = st.date_input("End Date", date.today())
 
-        next_day_logout = st.checkbox("Next Day Logout", value=False)
+    col3, col4 = st.columns(2)
+    with col3:
+        shift_start = st.text_input("Shift Start (HH:MM, 24hr)", "22:30")
+    with col4:
+        shift_end = st.text_input("Shift End (HH:MM, 24hr)", "08:00")
 
-        submit = st.form_submit_button("Generate CSV")
+    next_day_logout = st.checkbox("🔁 Logout happens on next day", value=False)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    submit = st.form_submit_button("✅ Generate CSV")
 
 # Handle form submission
 if submit:
