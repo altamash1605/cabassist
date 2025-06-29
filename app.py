@@ -49,6 +49,12 @@ def set_background(image_file):
 
 set_background("background.png")
 
+# --- Weekday Mapping ---
+weekday_map = {
+    "Monday": 0, "Tuesday": 1, "Wednesday": 2,
+    "Thursday": 3, "Friday": 4, "Saturday": 5, "Sunday": 6
+}
+
 # --- Form UI ---
 with st.container():
     st.markdown('<div class="glass-box">', unsafe_allow_html=True)
@@ -72,6 +78,8 @@ with st.container():
             shift_end = st.text_input("Shift End (HH:MM, 24hr)", "08:00")
 
         next_day_logout = st.checkbox("🔁 Logout happens on next day", value=False)
+        skip_days = st.multiselect("❌ Skip These Days", list(weekday_map.keys()), default=["Saturday", "Sunday"])
+        skip_indices = set(weekday_map[d] for d in skip_days)
 
         submit = st.form_submit_button("✅ Generate CSV")
 
@@ -81,15 +89,15 @@ with st.container():
 if submit:
     try:
         ids = [e.strip() for e in emp_ids.strip().split("\n") if e.strip()]
-        date_range = pd.date_range(start=start_date, end=end_date)
+        all_dates = pd.date_range(start=start_date, end=end_date)
+        valid_dates = [d for d in all_dates if d.weekday() not in skip_indices]
 
         rows = []
         for emp_id in ids:
             if next_day_logout:
-                for i, d in enumerate(date_range):
+                for i, d in enumerate(valid_dates):
                     shift_date = d.strftime("%-d/%-m/%Y")
                     if i == 0:
-                        # First day login only
                         rows.append({
                             "EmployeeId": emp_id,
                             "LogIn": shift_start,
@@ -109,8 +117,12 @@ if submit:
                             "ShiftDate": shift_date,
                             "EditType": "ADD"
                         })
-                # Add logout-only row on the next day
+
+                # Add logout-only row after last valid date
                 logout_day = end_date + timedelta(days=1)
+                while logout_day.weekday() in skip_indices:
+                    logout_day += timedelta(days=1)
+
                 rows.append({
                     "EmployeeId": emp_id,
                     "LogIn": "",
@@ -120,8 +132,9 @@ if submit:
                     "ShiftDate": logout_day.strftime("%-d/%-m/%Y"),
                     "EditType": "ADD"
                 })
+
             else:
-                for d in date_range:
+                for d in valid_dates:
                     shift_date = d.strftime("%-d/%-m/%Y")
                     rows.append({
                         "EmployeeId": emp_id,
@@ -149,6 +162,7 @@ st.markdown("""
             <li>Select Start Date and End Date for scheduling</li>
             <li>Enter Shift Start and End times in 24-hour format (e.g., 22:30)</li>
             <li>✅ If your logout happens the next day, check <strong>‘Logout happens on next day’</strong></li>
+            <li>❌ Select which days to skip (weekends or custom)</li>
             <li>Click <strong>Generate CSV</strong> to download the file</li>
             <li>Upload it to your <strong>MoveInSync</strong> admin panel</li>
         </ol>
