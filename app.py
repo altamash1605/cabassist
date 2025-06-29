@@ -88,19 +88,32 @@ if submit:
         full_dates = pd.date_range(start=start_date, end=end_date + timedelta(days=1))
         working_days = [d for d in full_dates if d.weekday() not in skip_indices and d <= end_date]
 
+        login_dates = set(d.date() for d in working_days)
         rows = []
+
         for emp_id in ids:
-            for i, day in enumerate(working_days):
-                day_str = day.strftime("%-d/%-m/%Y")
-                rows.append({"EmployeeId": emp_id, "LogIn": shift_start, "LogOut": "", "LogInVenue": "", "LogOutVenue": "", "ShiftDate": day_str, "EditType": "ADD"})
+            for day in working_days:
+                rows.append({
+                    "EmployeeId": emp_id,
+                    "LogIn": shift_start,
+                    "LogOut": "",
+                    "LogInVenue": "",
+                    "LogOutVenue": "",
+                    "ShiftDate": day.strftime("%-d/%-m/%Y"),
+                    "EditType": "ADD"
+                })
 
                 next_day = day + timedelta(days=1)
-                if next_day > end_date + timedelta(days=1):
-                    continue
-
-                if (i == len(working_days) - 1) or (working_days[i + 1] != next_day):
-                    next_day_str = next_day.strftime("%-d/%-m/%Y")
-                    rows.append({"EmployeeId": emp_id, "LogIn": "", "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": next_day_str, "EditType": "ADD"})
+                if next_day.date() not in login_dates:
+                    rows.append({
+                        "EmployeeId": emp_id,
+                        "LogIn": "",
+                        "LogOut": shift_end,
+                        "LogInVenue": "",
+                        "LogOutVenue": "",
+                        "ShiftDate": next_day.strftime("%-d/%-m/%Y"),
+                        "EditType": "ADD"
+                    })
 
         df = pd.DataFrame(rows)
         st.success("✅ CSV Ready!")
