@@ -1,12 +1,12 @@
 import streamlit as st
 import pandas as pd
-from datetime import date
+from datetime import date, timedelta
 import base64
 
-# Page config
+# Set page config
 st.set_page_config(page_title="MoveInSync Cab Scheduler", page_icon="🚗", layout="centered")
 
-# Function to set background from local image
+# Set background image
 def set_background(image_file):
     with open(image_file, "rb") as file:
         encoded = base64.b64encode(file.read()).decode()
@@ -19,14 +19,19 @@ def set_background(image_file):
             background-position: center;
             background-attachment: fixed;
         }}
-        .main > div {{
-            background-color: rgba(0, 0, 0, 0.65);
+        .glass-box {{
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
             padding: 2rem;
-            border-radius: 12px;
+            margin: 4rem auto;
+            width: 90%;
             max-width: 700px;
-            margin: auto;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }}
-        label, h1, .stTextInput, .stDateInput, .stTextArea, .stButton {{
+        .stTextInput input, .stTextArea textarea, .stDateInput input, .stButton button, label {{
             color: white !important;
         }}
         </style>
@@ -34,31 +39,37 @@ def set_background(image_file):
         unsafe_allow_html=True
     )
 
-# Apply background
-set_background("background.png")
+# Load background
+set_background("background.jpg")
 
-# Title
-st.markdown("<h1 style='text-align: center; color: white;'>CabAssist</h1>", unsafe_allow_html=True)
+# Glass container for the form
+with st.container():
+    st.markdown('<div class="glass-box">', unsafe_allow_html=True)
 
-# Form
-with st.form("cab_form"):
-    emp_ids = st.text_area("Employee IDs (one per line)")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        start_date = st.date_input("Start Date", date.today())
-    with col2:
-        end_date = st.date_input("End Date", date.today())
+    st.markdown("<h2 style='text-align: center;'>MoveInSync Bulk Cab Scheduler – v1.1</h2>", unsafe_allow_html=True)
 
-    col3, col4 = st.columns(2)
-    with col3:
-        shift_start = st.text_input("Shift Start (HH:MM, 24hr)", "22:30")
-    with col4:
-        shift_end = st.text_input("Shift End (HH:MM, 24hr)", "08:00")
+    with st.form("cab_form"):
+        emp_ids = st.text_area("Employee IDs (one per line)")
 
-    submit = st.form_submit_button("Generate CSV")
+        col1, col2 = st.columns(2)
+        with col1:
+            start_date = st.date_input("Start Date", date.today())
+        with col2:
+            end_date = st.date_input("End Date", date.today())
 
-# CSV generation
+        col3, col4 = st.columns(2)
+        with col3:
+            shift_start = st.text_input("Shift Start (HH:MM, 24hr)", "22:30")
+        with col4:
+            shift_end = st.text_input("Shift End (HH:MM, 24hr)", "08:00")
+
+        next_day_logout = st.checkbox("Next Day Logout", value=False)
+
+        submit = st.form_submit_button("Generate CSV")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Handle form submission
 if submit:
     try:
         ids = [e.strip() for e in emp_ids.strip().split("\n") if e.strip()]
@@ -67,6 +78,7 @@ if submit:
         rows = []
         for emp_id in ids:
             for d in date_range:
+                logout_date = d + timedelta(days=1) if next_day_logout else d
                 rows.append({
                     "EmployeeId": emp_id,
                     "LogIn": shift_start,
@@ -83,31 +95,3 @@ if submit:
 
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
-
-# --- How to Use: Info Glass Card ---
-st.markdown("""
-    <div style="
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 16px;
-        padding: 1.5rem;
-        margin-top: 2rem;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        color: white;
-        max-width: 700px;
-        margin-left: auto;
-        margin-right: auto;
-    ">
-    <h4>🧾 How to Use</h4>
-    <ol>
-        <li>Paste each Employee ID on a new line</li>
-        <li>Select the start and end date for scheduling</li>
-        <li>Enter shift login and logout time in 24-hour format</li>
-        <li>Click "Generate CSV" to download the formatted file</li>
-        <li>Upload the CSV into MoveInSync dashboard</li>
-    </ol>
-    <p style="margin-top: 1rem;">ℹ️ The CSV is formatted automatically as per MoveInSync requirements.</p>
-    </div>
-""", unsafe_allow_html=True)
-
