@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta
 import base64
 
 # --- Page Setup ---
@@ -85,37 +85,46 @@ if submit:
         weekday_map = {"Monday": 0, "Tuesday": 1, "Wednesday": 2, "Thursday": 3, "Friday": 4, "Saturday": 5, "Sunday": 6}
         skip_indices = {weekday_map[d] for d in skip_days}
 
-        full_dates = pd.date_range(start=start_date, end=end_date + timedelta(days=1))
-        working_days = [d for d in full_dates if d.weekday() not in skip_indices and d <= end_date]
-
-        login_dates = set(d.date() for d in working_days)
+        all_dates = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 2)]
         rows = []
 
         for emp_id in ids:
-            for day in working_days:
-                rows.append({
-                    "EmployeeId": emp_id,
-                    "LogIn": shift_start,
-                    "LogOut": "",
-                    "LogInVenue": "",
-                    "LogOutVenue": "",
-                    "ShiftDate": day.strftime("%-d/%-m/%Y"),
-                    "EditType": "ADD"
-                })
+            record_map = {}
 
-                next_day = day + timedelta(days=1)
-                if next_day.date() not in login_dates:
-                    rows.append({
-                        "EmployeeId": emp_id,
-                        "LogIn": "",
-                        "LogOut": shift_end,
-                        "LogInVenue": "",
-                        "LogOutVenue": "",
-                        "ShiftDate": next_day.strftime("%-d/%-m/%Y"),
-                        "EditType": "ADD"
-                    })
+            for i, current_date in enumerate(all_dates[:-1]):
+                next_date = current_date + timedelta(days=1)
+                weekday = current_date.weekday()
 
-        df = pd.DataFrame(rows)
+                if weekday not in skip_indices:
+                    # Working day: Add login
+                    shift_date_str = current_date.strftime("%-d/%-m/%Y")
+                    if shift_date_str not in record_map:
+                        record_map[shift_date_str] = {"EmployeeId": emp_id, "LogIn": shift_start, "LogOut": "", "LogInVenue": "", "LogOutVenue": "", "ShiftDate": shift_date_str, "EditType": "ADD"}
+                    else:
+                        record_map[shift_date_str]["LogIn"] = shift_start
+
+                    if next_day_logout:
+                        # Add logout to the next date
+                        logout_shift_date = next_date.strftime("%-d/%-m/%Y")
+                        if logout_shift_date not in record_map:
+                            record_map[logout_shift_date] = {"EmployeeId": emp_id, "LogIn": "", "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": logout_shift_date, "EditType": "ADD"}
+                        else:
+                            record_map[logout_shift_date]["LogOut"] = shift_end
+                else:
+                    # Skipped day
+                    if next_day_logout and i > 0:
+                        # Previous day was working, add logout on skipped day
+                        prev_date = all_dates[i - 1]
+                        if prev_date.weekday() not in skip_indices:
+                            logout_shift_date = current_date.strftime("%-d/%-m/%Y")
+                            if logout_shift_date not in record_map:
+                                record_map[logout_shift_date] = {"EmployeeId": emp_id, "LogIn": "", "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": logout_shift_date, "EditType": "ADD"}
+                            else:
+                                record_map[logout_shift_date]["LogOut"] = shift_end
+
+            rows.extend(record_map.values())
+
+        df = pd.DataFrame(rows).sort_values(by=["EmployeeId", "ShiftDate"])
         st.success("✅ CSV Ready!")
         st.download_button("📅 Download CSV", df.to_csv(index=False), file_name="moveinsync_schedule.csv", mime="text/csv")
 
