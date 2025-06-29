@@ -82,10 +82,7 @@ with st.container():
 if submit:
     try:
         ids = [e.strip() for e in emp_ids.strip().split("\n") if e.strip()]
-        weekday_map = {
-            "Monday": 0, "Tuesday": 1, "Wednesday": 2,
-            "Thursday": 3, "Friday": 4, "Saturday": 5, "Sunday": 6
-        }
+        weekday_map = {"Monday": 0, "Tuesday": 1, "Wednesday": 2, "Thursday": 3, "Friday": 4, "Saturday": 5, "Sunday": 6}
         skip_indices = set(weekday_map[d] for d in skip_days)
 
         all_dates = pd.date_range(start=start_date, end=end_date + timedelta(days=1))
@@ -95,23 +92,23 @@ if submit:
         for emp_id in ids:
             last_login_date = None
             for current_day in all_dates:
-                date_str = current_day.strftime("%-d/%-m/%Y")
+                dstr = current_day.strftime("%-d/%-m/%Y")
                 is_working = current_day in working_days
 
                 if current_day == working_days[0]:
-                    rows.append({"EmployeeId": emp_id, "LogIn": shift_start, "LogOut": "", "LogInVenue": "", "LogOutVenue": "", "ShiftDate": date_str, "EditType": "ADD"})
+                    rows.append({"EmployeeId": emp_id, "LogIn": shift_start, "LogOut": "", "LogInVenue": "", "LogOutVenue": "", "ShiftDate": dstr, "EditType": "ADD"})
                     last_login_date = current_day
                 elif is_working and current_day != working_days[-1]:
-                    rows.append({"EmployeeId": emp_id, "LogIn": shift_start, "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": date_str, "EditType": "ADD"})
+                    rows.append({"EmployeeId": emp_id, "LogIn": shift_start, "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": dstr, "EditType": "ADD"})
                     last_login_date = current_day
                 elif current_day == working_days[-1]:
-                    rows.append({"EmployeeId": emp_id, "LogIn": shift_start, "LogOut": "", "LogInVenue": "", "LogOutVenue": "", "ShiftDate": date_str, "EditType": "ADD"})
+                    rows.append({"EmployeeId": emp_id, "LogIn": shift_start, "LogOut": "", "LogInVenue": "", "LogOutVenue": "", "ShiftDate": dstr, "EditType": "ADD"})
                     last_login_date = current_day
                 elif not is_working and last_login_date and (current_day - last_login_date).days == 1:
-                    rows.append({"EmployeeId": emp_id, "LogIn": "", "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": date_str, "EditType": "ADD"})
+                    rows.append({"EmployeeId": emp_id, "LogIn": "", "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": dstr, "EditType": "ADD"})
                     last_login_date = None
                 elif current_day == working_days[-1] + timedelta(days=1):
-                    rows.append({"EmployeeId": emp_id, "LogIn": "", "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": date_str, "EditType": "ADD"})
+                    rows.append({"EmployeeId": emp_id, "LogIn": "", "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": dstr, "EditType": "ADD"})
 
         df = pd.DataFrame(rows)
         st.success("✅ CSV Ready!")
