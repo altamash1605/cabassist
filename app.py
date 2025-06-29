@@ -3,8 +3,8 @@ import pandas as pd
 from datetime import date, timedelta
 import base64
 
-# --- Page Configuration ---
-st.set_page_config(page_title="CabAssist", page_icon="🚗", layout="centered")
+# --- Page Setup ---
+st.set_page_config(page_title="MoveInSync Cab Scheduler", page_icon="🚗", layout="centered")
 
 # --- Background Image Setup ---
 def set_background(image_file):
@@ -19,15 +19,25 @@ def set_background(image_file):
             background-position: center;
             background-attachment: fixed;
         }}
-        
+        .glass-box {{
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 4rem auto;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }}
         .stTextInput input,
         .stTextArea textarea,
         .stDateInput input,
-        .stSelectbox div,
         .stCheckbox div,
         .stButton button,
         label,
-        h1, h2, h3, h4, h5, h6,
+        h1, h2, h3, h4,
         .css-17eq0hr,
         .css-1v0mbdj {{
             color: white !important;
@@ -37,14 +47,12 @@ def set_background(image_file):
         unsafe_allow_html=True
     )
 
-# Apply background image
 set_background("background.png")
 
 # --- Form UI ---
 with st.container():
     st.markdown('<div class="glass-box">', unsafe_allow_html=True)
-
-    st.markdown("<h2 style='text-align: center;'>CabAssist</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>MoveInSync Cab Scheduler – v1.1.1</h2>", unsafe_allow_html=True)
 
     with st.form("cab_form"):
         st.markdown("### 👤 Employee Input")
@@ -78,16 +86,38 @@ if submit:
         rows = []
         for emp_id in ids:
             for d in date_range:
-                logout_date = d + timedelta(days=1) if next_day_logout else d
-                rows.append({
-                    "EmployeeId": emp_id,
-                    "LogIn": shift_start,
-                    "LogOut": shift_end,
-                    "LogInVenue": "",
-                    "LogOutVenue": "",
-                    "ShiftDate": f"{d.day}/{d.month}/{d.year}",
-                    "EditType": "ADD"
-                })
+                if next_day_logout:
+                    # Login row on day 1
+                    rows.append({
+                        "EmployeeId": emp_id,
+                        "LogIn": shift_start,
+                        "LogOut": "",
+                        "LogInVenue": "",
+                        "LogOutVenue": "",
+                        "ShiftDate": f"{d.day}/{d.month}/{d.year}",
+                        "EditType": "ADD"
+                    })
+                    # Logout row on next day
+                    next_day = d + timedelta(days=1)
+                    rows.append({
+                        "EmployeeId": emp_id,
+                        "LogIn": "",
+                        "LogOut": shift_end,
+                        "LogInVenue": "",
+                        "LogOutVenue": "",
+                        "ShiftDate": f"{next_day.day}/{next_day.month}/{next_day.year}",
+                        "EditType": "ADD"
+                    })
+                else:
+                    rows.append({
+                        "EmployeeId": emp_id,
+                        "LogIn": shift_start,
+                        "LogOut": shift_end,
+                        "LogInVenue": "",
+                        "LogOutVenue": "",
+                        "ShiftDate": f"{d.day}/{d.month}/{d.year}",
+                        "EditType": "ADD"
+                    })
 
         df = pd.DataFrame(rows)
         st.success("✅ CSV Ready!")
@@ -95,3 +125,19 @@ if submit:
 
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
+
+# --- How to Use: Instruction Box ---
+st.markdown("""
+    <div class="glass-box">
+        <h4>📘 How to Use This Tool</h4>
+        <ol>
+            <li>Paste each Employee ID on a new line</li>
+            <li>Select Start Date and End Date for scheduling</li>
+            <li>Enter Shift Start and End times in 24-hour format (e.g., 22:30)</li>
+            <li>✅ If your logout happens the next day, check <strong>‘Logout happens on next day’</strong></li>
+            <li>Click <strong>Generate CSV</strong> to download the file</li>
+            <li>Upload it to your <strong>MoveInSync</strong> admin panel</li>
+        </ol>
+        <p style="margin-top: 1rem;">ℹ️ The tool handles overnight shifts by splitting login and logout across two days.</p>
+    </div>
+""", unsafe_allow_html=True)
