@@ -89,8 +89,6 @@ if submit:
         rows = []
 
         for emp_id in ids:
-            record_map = {}
-
             for i, current_date in enumerate(all_dates[:-1]):
                 next_date = current_date + timedelta(days=1)
                 weekday = current_date.weekday()
@@ -98,31 +96,42 @@ if submit:
                 if weekday not in skip_indices:
                     # Working day: Add login
                     shift_date_str = current_date.strftime("%-d/%-m/%Y")
-                    if shift_date_str not in record_map:
-                        record_map[shift_date_str] = {"EmployeeId": emp_id, "LogIn": shift_start, "LogOut": "", "LogInVenue": "", "LogOutVenue": "", "ShiftDate": shift_date_str, "EditType": "ADD"}
-                    else:
-                        record_map[shift_date_str]["LogIn"] = shift_start
+                    rows.append({
+                        "EmployeeId": emp_id,
+                        "LogIn": shift_start,
+                        "LogOut": "",
+                        "LogInVenue": "",
+                        "LogOutVenue": "",
+                        "ShiftDate": shift_date_str,
+                        "EditType": "ADD"
+                    })
 
                     if next_day_logout:
-                        # Add logout to the next date
                         logout_shift_date = next_date.strftime("%-d/%-m/%Y")
-                        if logout_shift_date not in record_map:
-                            record_map[logout_shift_date] = {"EmployeeId": emp_id, "LogIn": "", "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": logout_shift_date, "EditType": "ADD"}
-                        else:
-                            record_map[logout_shift_date]["LogOut"] = shift_end
+                        rows.append({
+                            "EmployeeId": emp_id,
+                            "LogIn": "",
+                            "LogOut": shift_end,
+                            "LogInVenue": "",
+                            "LogOutVenue": "",
+                            "ShiftDate": logout_shift_date,
+                            "EditType": "ADD"
+                        })
                 else:
                     # Skipped day
                     if next_day_logout and i > 0:
-                        # Previous day was working, add logout on skipped day
                         prev_date = all_dates[i - 1]
                         if prev_date.weekday() not in skip_indices:
                             logout_shift_date = current_date.strftime("%-d/%-m/%Y")
-                            if logout_shift_date not in record_map:
-                                record_map[logout_shift_date] = {"EmployeeId": emp_id, "LogIn": "", "LogOut": shift_end, "LogInVenue": "", "LogOutVenue": "", "ShiftDate": logout_shift_date, "EditType": "ADD"}
-                            else:
-                                record_map[logout_shift_date]["LogOut"] = shift_end
-
-            rows.extend(record_map.values())
+                            rows.append({
+                                "EmployeeId": emp_id,
+                                "LogIn": "",
+                                "LogOut": shift_end,
+                                "LogInVenue": "",
+                                "LogOutVenue": "",
+                                "ShiftDate": logout_shift_date,
+                                "EditType": "ADD"
+                            })
 
         df = pd.DataFrame(rows).sort_values(by=["EmployeeId", "ShiftDate"])
         st.success("✅ CSV Ready!")
