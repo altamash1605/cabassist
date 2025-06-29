@@ -81,8 +81,6 @@ if submit:
         data = []
 
         for emp_id in ids:
-            last_login_date = None
-
             for i, current_day in enumerate(all_dates):
                 date_str = current_day.strftime("%-d/%-m/%Y")
                 prev_day = current_day - timedelta(days=1)
@@ -100,9 +98,8 @@ if submit:
                         "ShiftDate": date_str,
                         "EditType": "ADD"
                     })
-                    last_login_date = current_day
 
-                elif current_day in working_days[:-1] and current_day != working_days[0]:
+                elif current_day in working_days[1:-1]:
                     # Middle working days → Login + Logout
                     data.append({
                         "EmployeeId": emp_id,
@@ -113,7 +110,6 @@ if submit:
                         "ShiftDate": date_str,
                         "EditType": "ADD"
                     })
-                    last_login_date = current_day
 
                 elif current_day == working_days[-1]:
                     # Last working day → Login only
@@ -126,19 +122,23 @@ if submit:
                         "ShiftDate": date_str,
                         "EditType": "ADD"
                     })
-                    last_login_date = current_day
 
                 elif not is_working and was_prev_working:
-                    # Skipped day but previous day had login → logout only
-                    data.append({
-                        "EmployeeId": emp_id,
-                        "LogIn": "",
-                        "LogOut": shift_end,
-                        "LogInVenue": "",
-                        "LogOutVenue": "",
-                        "ShiftDate": date_str,
-                        "EditType": "ADD"
-                    })
+                    # Skipped day → if previous day had no logout, insert logout
+                    prev_str = prev_day.strftime("%-d/%-m/%Y")
+                    prev_entries = [row for row in data if row["EmployeeId"] == emp_id and row["ShiftDate"] == prev_str]
+                    if prev_entries:
+                        last = prev_entries[-1]
+                        if last["LogOut"] == "":
+                            data.append({
+                                "EmployeeId": emp_id,
+                                "LogIn": "",
+                                "LogOut": shift_end,
+                                "LogInVenue": "",
+                                "LogOutVenue": "",
+                                "ShiftDate": date_str,
+                                "EditType": "ADD"
+                            })
 
                 elif current_day == working_days[-1] + timedelta(days=1):
                     # Next day after last working → logout only
@@ -154,7 +154,7 @@ if submit:
 
         df = pd.DataFrame(data)
         st.success("✅ CSV Generated!")
-        st.download_button("📥 Download CSV", df.to_csv(index=False), file_name="moveinsync_schedule_v1.2.csv", mime="text/csv")
+        st.download_button("📥 Download CSV", df.to_csv(index=False), file_name="moveinsync_schedule_v1.2.1.csv", mime="text/csv")
 
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
