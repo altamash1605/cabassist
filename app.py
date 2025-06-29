@@ -19,6 +19,18 @@ def set_background(image_file):
             background-position: center;
             background-attachment: fixed;
         }}
+        .glass-box {{
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 4rem auto;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }}
         .stTextInput input,
         .stTextArea textarea,
         .stDateInput input,
@@ -86,7 +98,7 @@ if submit:
                     raw_rows.append({
                         "EmployeeId": emp_id,
                         "LogIn": shift_start,
-                        "LogOut": "",
+                        "LogOut": "" if next_day_logout else shift_end,
                         "LogInVenue": "",
                         "LogOutVenue": "",
                         "ShiftDate": shift_date_str,
