@@ -4,7 +4,7 @@ from datetime import date, timedelta
 import base64
 
 # --- Page Configuration ---
-st.set_page_config(page_title="MoveInSync Cab Scheduler", page_icon="🚗", layout="centered")
+st.set_page_config(page_title="CabAssist", page_icon="🚗", layout="centered")
 
 # --- Background Image Setup ---
 def set_background(image_file):
@@ -19,18 +19,7 @@ def set_background(image_file):
             background-position: center;
             background-attachment: fixed;
         }}
-        .glass-box {{
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 4rem auto;
-            width: 90%;
-            max-width: 700px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }}
+        
         .stTextInput input,
         .stTextArea textarea,
         .stDateInput input,
@@ -55,7 +44,7 @@ set_background("background.jpg")
 with st.container():
     st.markdown('<div class="glass-box">', unsafe_allow_html=True)
 
-    st.markdown("<h2 style='text-align: center;'>MoveInSync Bulk Cab Scheduler – v1.1</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>CabAssist</h2>", unsafe_allow_html=True)
 
     with st.form("cab_form"):
         st.markdown("### 👤 Employee Input")
