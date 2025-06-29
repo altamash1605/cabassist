@@ -86,7 +86,7 @@ if submit:
         skip_indices = {weekday_map[d] for d in skip_days}
 
         all_dates = [start_date + timedelta(days=i) for i in range((end_date - start_date).days + 2)]
-        rows = []
+        raw_rows = []
 
         for emp_id in ids:
             for i, current_date in enumerate(all_dates[:-1]):
@@ -94,9 +94,8 @@ if submit:
                 weekday = current_date.weekday()
 
                 if weekday not in skip_indices:
-                    # Working day: Add login
                     shift_date_str = current_date.strftime("%-d/%-m/%Y")
-                    rows.append({
+                    raw_rows.append({
                         "EmployeeId": emp_id,
                         "LogIn": shift_start,
                         "LogOut": "",
@@ -108,7 +107,7 @@ if submit:
 
                     if next_day_logout:
                         logout_shift_date = next_date.strftime("%-d/%-m/%Y")
-                        rows.append({
+                        raw_rows.append({
                             "EmployeeId": emp_id,
                             "LogIn": "",
                             "LogOut": shift_end,
@@ -118,12 +117,11 @@ if submit:
                             "EditType": "ADD"
                         })
                 else:
-                    # Skipped day
                     if next_day_logout and i > 0:
                         prev_date = all_dates[i - 1]
                         if prev_date.weekday() not in skip_indices:
                             logout_shift_date = current_date.strftime("%-d/%-m/%Y")
-                            rows.append({
+                            raw_rows.append({
                                 "EmployeeId": emp_id,
                                 "LogIn": "",
                                 "LogOut": shift_end,
@@ -133,7 +131,19 @@ if submit:
                                 "EditType": "ADD"
                             })
 
-        df = pd.DataFrame(rows)  # No flattening/merging logic
+        # Smart merge: one row per employee + date
+        merged_rows = {}
+        for row in raw_rows:
+            key = (row['EmployeeId'], row['ShiftDate'])
+            if key not in merged_rows:
+                merged_rows[key] = row
+            else:
+                if not merged_rows[key]['LogIn'] and row['LogIn']:
+                    merged_rows[key]['LogIn'] = row['LogIn']
+                if not merged_rows[key]['LogOut'] and row['LogOut']:
+                    merged_rows[key]['LogOut'] = row['LogOut']
+
+        df = pd.DataFrame(merged_rows.values())
         st.success("✅ CSV Ready!")
         st.download_button("📅 Download CSV", df.to_csv(index=False), file_name="moveinsync_schedule.csv", mime="text/csv")
 
@@ -153,6 +163,6 @@ st.markdown("""
             <li>Click <strong>Generate CSV</strong> to download the file</li>
             <li>Upload it to your <strong>MoveInSync</strong> admin panel</li>
         </ol>
-        <p style="margin-top: 1rem;">Entries are created exactly as configured. Skipped days may still receive logout entries.</p>
+        <p style="margin-top: 1rem;">Entries are merged per date per employee. Logout-only rows from skipped days will be preserved.</p>
     </div>
 """, unsafe_allow_html=True)
