@@ -133,7 +133,7 @@ if submit:
                                 "EditType": "ADD"
                             })
 
-        df = pd.DataFrame(rows).sort_values(by=["EmployeeId", "ShiftDate"])
+        df = pd.DataFrame(rows)  # No flattening/merging logic
         st.success("✅ CSV Ready!")
         st.download_button("📅 Download CSV", df.to_csv(index=False), file_name="moveinsync_schedule.csv", mime="text/csv")
 
@@ -153,6 +153,6 @@ st.markdown("""
             <li>Click <strong>Generate CSV</strong> to download the file</li>
             <li>Upload it to your <strong>MoveInSync</strong> admin panel</li>
         </ol>
-        <p style="margin-top: 1rem;">Only one entry per date is generated — logout logic adjusts based on your checkbox selection.</p>
+        <p style="margin-top: 1rem;">Entries are created exactly as configured. Skipped days may still receive logout entries.</p>
     </div>
 """, unsafe_allow_html=True)
