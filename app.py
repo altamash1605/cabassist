@@ -15,18 +15,14 @@ supabase: Client = create_client(url, key)
 def log_event(event_type: str):
     try:
         ip_address = requests.get("https://api64.ipify.org?format=json").json()["ip"]
-        user_agent = st.session_state.get("user_agent", "")
         supabase.table("analytics").insert({
             "event": event_type,
-            "user_agent": user_agent,
             "ip_address": ip_address,
         }).execute()
     except Exception as e:
         print(f"Logging error: {e}")
 
 # --- Log Visit ---
-if "user_agent" not in st.session_state:
-    st.session_state["user_agent"] = st.request.headers.get("user-agent", "")
 log_event("visit")
 
 # --- Page Setup ---
