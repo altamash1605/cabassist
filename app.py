@@ -6,6 +6,14 @@ from supabase import create_client, Client
 import requests
 from datetime import datetime
 
+st.markdown(
+    """
+    <link rel="shortcut icon" href="favicon.png">
+    """,
+    unsafe_allow_html=True
+)
+
+
 # --- Supabase Setup ---
 url = "https://tpzujvdwuhxdtulebftj.supabase.co"
 key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwenVqdmR3dWh4ZHR1bGViZnRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NTkzNTYsImV4cCI6MjA2NzAzNTM1Nn0.rIEIGYT1eUw0cog0WPwCnOSHS1Uk0cz_FLdXeu7kVgk"
