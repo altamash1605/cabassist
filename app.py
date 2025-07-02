@@ -53,8 +53,20 @@ set_background("background.png")
 # --- Form UI ---
 with st.container():
     st.markdown('<div class="glass-box">', unsafe_allow_html=True)
-    st.markdown("<h2 style='text-align: center;'>CabAssist</h2>", unsafe_allow_html=True)
-
+    st.markdown("""
+<h1 style="
+    text-align: center;
+    font-size: 48px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #facc15, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2rem;
+    font-family: 'Segoe UI', sans-serif;
+">
+    CabAssist
+</h1>
+""", unsafe_allow_html=True)
     with st.form("cab_form"):
         st.markdown("### 👤 Employee Input")
         emp_ids = st.text_area("Enter Employee IDs (one per line)", height=150)
