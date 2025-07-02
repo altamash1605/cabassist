@@ -52,7 +52,6 @@ set_background("background.png")
 
 # --- Form UI ---
 with st.container():
-    st.markdown('<div class="glass-box">', unsafe_allow_html=True)
     st.markdown("""
 <h1 style="
     text-align: center;
