@@ -66,7 +66,7 @@ with st.container():
   CabAssist
     </h1>
     
-    </div>', """unsafe_allow_html=True)
+    </div>, """unsafe_allow_html=True)
     st.markdown("<h2 style='text-align: center;'>CabAssist</h2>", unsafe_allow_html=True)
 
     with st.form("cab_form"):
