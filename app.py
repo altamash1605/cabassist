@@ -67,7 +67,7 @@ with st.markdown("""
         </ol>
         <p style="margin-top: 1rem;">Each date has only one row per employee. Logout-only entries on skipped days are preserved.</p>
     </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True):
     st.markdown("<h2 style='text-align: center;'>CabAssist</h2>", unsafe_allow_html=True)
 
     with st.form("cab_form"):
