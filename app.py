@@ -36,6 +36,7 @@ def set_background(image_file):
         .stDateInput input,
         .stCheckbox div,
         .stButton button,
+        .stRadio div,
         label,
         h1, h2, h3, h4,
         .css-17eq0hr,
@@ -71,9 +72,9 @@ with st.container():
         with col4:
             shift_end = st.text_input("Shift End (HH:MM, 24hr)", "08:00")
 
-        skip_days = st.multiselect("Select Days to Skip (weekends, holidays)", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], default=["Saturday", "Sunday"])
-        next_day_logout = st.checkbox("🔀 Logout happens on next day", value=False)
-        edit_type = st.radio("Edit Type", options=["ADD", "DELETE"], horizontal=True)
+        skip_days = st.multiselect("Select Days to Skip", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], default=["Saturday", "Sunday"])
+        next_day_logout = st.checkbox("🔁 Logout happens on next day", value=False)
+        edit_type = st.radio("Edit Type", ["ADD", "DELETE"], horizontal=True)
 
         submit = st.form_submit_button("✅ Generate CSV")
 
@@ -161,10 +162,11 @@ st.markdown("""
             <li>Enter Shift Start and End times in 24-hour format (e.g., 22:30)</li>
             <li>Select which days to skip (like weekends)</li>
             <li>✅ If your logout happens the next day, check <strong>‘Logout happens on next day’</strong></li>
-            <li>Choose whether this is an <strong>ADD</strong> or <strong>DELETE</strong> operation</li>
+            <li>Select <strong>ADD</strong> or <strong>DELETE</strong> to reflect the Edit Type in your CSV</li>
             <li>Click <strong>Generate CSV</strong> to download the file</li>
             <li>Upload it to your <strong>MoveInSync</strong> admin panel</li>
         </ol>
-        <p style="margin-top: 1rem;">Entries are merged per date per employee. Logout-only rows from skipped days will be preserved.</p>
+        <p style="margin-top: 1rem;">Each date has only one row per employee. Logout-only entries on skipped days are preserved.</p>
     </div>
 """, unsafe_allow_html=True)
+
