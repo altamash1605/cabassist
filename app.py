@@ -27,6 +27,7 @@ def set_background(image_file):
             width: 90%;
             max-width: 700px;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            text-white;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.18);
@@ -52,7 +53,20 @@ set_background("background.png")
 
 # --- Form UI ---
 with st.container():
-    st.markdown('<div class="glass-box">', unsafe_allow_html=True)
+    st.markdown("""<div class="glass-box">
+    <h1 style="
+        font-size: 48px;
+        font-weight: 900;
+        background: linear-gradient(90deg, #a100ff, #d000ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        font-family: Arial, sans-serif;
+    ">
+  CabAssist
+    </h1>
+    
+    </div>', """unsafe_allow_html=True)
     st.markdown("<h2 style='text-align: center;'>CabAssist</h2>", unsafe_allow_html=True)
 
     with st.form("cab_form"):
