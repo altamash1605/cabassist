@@ -73,6 +73,7 @@ with st.container():
 
         skip_days = st.multiselect("Select Days to Skip (weekends, holidays)", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], default=["Saturday", "Sunday"])
         next_day_logout = st.checkbox("🔀 Logout happens on next day", value=False)
+        edit_type = st.radio("Edit Type", options=["ADD", "DELETE"], horizontal=True)
 
         submit = st.form_submit_button("✅ Generate CSV")
 
@@ -102,7 +103,7 @@ if submit:
                         "LogInVenue": "",
                         "LogOutVenue": "",
                         "ShiftDate": shift_date_str,
-                        "EditType": "ADD"
+                        "EditType": edit_type
                     })
 
                     if next_day_logout:
@@ -114,7 +115,7 @@ if submit:
                             "LogInVenue": "",
                             "LogOutVenue": "",
                             "ShiftDate": logout_shift_date,
-                            "EditType": "ADD"
+                            "EditType": edit_type
                         })
                 else:
                     if next_day_logout and i > 0:
@@ -128,7 +129,7 @@ if submit:
                                 "LogInVenue": "",
                                 "LogOutVenue": "",
                                 "ShiftDate": logout_shift_date,
-                                "EditType": "ADD"
+                                "EditType": edit_type
                             })
 
         # Smart merge: one row per employee + date
@@ -160,6 +161,7 @@ st.markdown("""
             <li>Enter Shift Start and End times in 24-hour format (e.g., 22:30)</li>
             <li>Select which days to skip (like weekends)</li>
             <li>✅ If your logout happens the next day, check <strong>‘Logout happens on next day’</strong></li>
+            <li>Choose whether this is an <strong>ADD</strong> or <strong>DELETE</strong> operation</li>
             <li>Click <strong>Generate CSV</strong> to download the file</li>
             <li>Upload it to your <strong>MoveInSync</strong> admin panel</li>
         </ol>
