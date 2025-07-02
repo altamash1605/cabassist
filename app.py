@@ -2,6 +2,21 @@ import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
 import base64
+from supabase import create_client, Client
+import requests
+from datetime import datetime
+
+# Setup Supabase Client
+url = "https://tpzujvdwuhxdtulebftj.supabase.co"
+key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwenVqdmR3dWh4ZHR1bGViZnRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NTkzNTYsImV4cCI6MjA2NzAzNTM1Nn0.rIEIGYT1eUw0cog0WPwCnOSHS1Uk0cz_FLdXeu7kVgk"
+supabase: Client = create_client(url, key)
+
+# Log visit
+try:
+    ip = requests.get("https://api.ipify.org").text
+    supabase.table("visits").insert({"timestamp": datetime.now(), "ip": ip}).execute()
+except Exception as e:
+    print("Visit logging failed:", e)
 
 # --- Page Setup ---
 st.set_page_config(page_title="CabAssist", page_icon="🚗", layout="centered")
@@ -157,6 +172,14 @@ if submit:
                     merged_rows[key]['LogOut'] = row['LogOut']
 
         df = pd.DataFrame(merged_rows.values())
+
+        # Log download
+        supabase.table("downloads").insert({
+            "timestamp": datetime.now(),
+            "employee_count": len(ids),
+            "file_name": "moveinsync_schedule.csv"
+        }).execute()
+
         st.success("✅ CSV Ready!")
         st.download_button("📅 Download CSV", df.to_csv(index=False), file_name="moveinsync_schedule.csv", mime="text/csv")
 
