@@ -54,18 +54,17 @@ set_background("background.png")
 # --- Form UI ---
 with st.markdown("""
     <div class="glass-box">
-        <h4>📘 How to Use This Tool</h4>
-        <ol>
-            <li>Paste each Employee ID on a new line</li>
-            <li>Select Start Date and End Date for scheduling</li>
-            <li>Enter Shift Start and End times in 24-hour format (e.g., 22:30)</li>
-            <li>Select which days to skip (like weekends)</li>
-            <li>✅ If your logout happens the next day, check <strong>‘Logout happens on next day’</strong></li>
-            <li>Select <strong>ADD</strong> or <strong>DELETE</strong> to reflect the Edit Type in your CSV</li>
-            <li>Click <strong>Generate CSV</strong> to download the file</li>
-            <li>Upload it to your <strong>MoveInSync</strong> admin panel</li>
-        </ol>
-        <p style="margin-top: 1rem;">Each date has only one row per employee. Logout-only entries on skipped days are preserved.</p>
+    <h1 style="
+        font-size: 48px;
+        font-weight: 900;
+        background: linear-gradient(90deg, #a100ff, #d000ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        ">
+        CabAssist
+    </h1>
     </div>
 """, unsafe_allow_html=True):
     st.markdown("<h2 style='text-align: center;'>CabAssist</h2>", unsafe_allow_html=True)
