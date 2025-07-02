@@ -6,17 +6,28 @@ from supabase import create_client, Client
 import requests
 from datetime import datetime
 
-# Setup Supabase Client
+# --- Supabase Setup ---
 url = "https://tpzujvdwuhxdtulebftj.supabase.co"
 key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRwenVqdmR3dWh4ZHR1bGViZnRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE0NTkzNTYsImV4cCI6MjA2NzAzNTM1Nn0.rIEIGYT1eUw0cog0WPwCnOSHS1Uk0cz_FLdXeu7kVgk"
 supabase: Client = create_client(url, key)
 
-# Log visit
-try:
-    ip = requests.get("https://api.ipify.org").text
-    supabase.table("visits").insert({"timestamp": datetime.now(), "ip": ip}).execute()
-except Exception as e:
-    print("Visit logging failed:", e)
+# --- Logging Function ---
+def log_event(event_type: str):
+    try:
+        ip_address = requests.get("https://api64.ipify.org?format=json").json()["ip"]
+        user_agent = st.session_state.get("user_agent", "")
+        supabase.table("analytics").insert({
+            "event": event_type,
+            "user_agent": user_agent,
+            "ip_address": ip_address,
+        }).execute()
+    except Exception as e:
+        print(f"Logging error: {e}")
+
+# --- Log Visit ---
+if "user_agent" not in st.session_state:
+    st.session_state["user_agent"] = st.request.headers.get("user-agent", "")
+log_event("visit")
 
 # --- Page Setup ---
 st.set_page_config(page_title="CabAssist", page_icon="🚗", layout="centered")
@@ -81,6 +92,7 @@ with st.container():
     CabAssist
 </h1>
 """, unsafe_allow_html=True)
+
     with st.form("cab_form"):
         st.markdown("### 👤 Employee Input")
         emp_ids = st.text_area("Enter Employee IDs (one per line)", height=150)
@@ -159,7 +171,7 @@ if submit:
                                 "EditType": edit_type
                             })
 
-        # Smart merge: one row per employee + date
+        # Merge rows per employee+date
         merged_rows = {}
         for row in raw_rows:
             key = (row['EmployeeId'], row['ShiftDate'])
@@ -172,16 +184,10 @@ if submit:
                     merged_rows[key]['LogOut'] = row['LogOut']
 
         df = pd.DataFrame(merged_rows.values())
-
-        # Log download
-        supabase.table("downloads").insert({
-            "timestamp": datetime.now(),
-            "employee_count": len(ids),
-            "file_name": "moveinsync_schedule.csv"
-        }).execute()
-
         st.success("✅ CSV Ready!")
-        st.download_button("📅 Download CSV", df.to_csv(index=False), file_name="moveinsync_schedule.csv", mime="text/csv")
+
+        if st.download_button("📅 Download CSV", df.to_csv(index=False), file_name="moveinsync_schedule.csv", mime="text/csv"):
+            log_event("download")
 
     except Exception as e:
         st.error(f"⚠️ Error: {e}")
